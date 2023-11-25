@@ -5,6 +5,8 @@ import keras
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import joblib
 
+import plotly.graph_objects as go
+
 from model.RNNCell import RNNCell
 from model.SLCell import SLCell
 
@@ -14,6 +16,7 @@ df = pd.read_csv('./data.csv',  parse_dates=['date'], index_col='date')
 
 dataset = df.copy()
 dataset = dataset.resample('W').ffill()
+l = len(dataset)
 
 # Using object notation
 add_selectbox = st.sidebar.selectbox(
@@ -44,11 +47,17 @@ else:
 # merged_df.drop(['price_x'], axis=1, inplace=True)
 
 
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=prediction_gru.index[l:], y=prediction_gru['price'],  color="red", name="Giá cũ", mode="lines"))
+fig.add_trace(go.Scatter(x=prediction_gru.index[], y=prediction_gru['price_pred'], color="blue", name="Giá dự đoán", mode="lines"))
+
 col1, col2 = st.columns([3, 1])
 
 col1.title('Giá lúa sau dự đoán với mô hình ' + optionModel)
 col1.line_chart(prediction_gru)
 st.dataframe(prediction_gru)
+
+st.plotly_chart(fig)
 
 col2.title('Giá lúa dự đoán')
 col2.dataframe(prediction_gru)
