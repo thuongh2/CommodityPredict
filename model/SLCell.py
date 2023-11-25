@@ -65,9 +65,23 @@ class SLCell:
 
         return predicted_prices
     
+    def get_result_df(self, model, days=12, freq='W'):
+        predict = self.get_result(model)
+
+        last_date = self._data.index[-1]
+        future_dates = pd.date_range(start=last_date , periods=len(predict), freq=freq)
+        print(future_dates)
+        predicted_df = pd.DataFrame(index=future_dates, columns=['price'])
+
+        for i, price in zip(range(len(predicted_df)), predict):
+            predicted_df.iloc[i] = price
+
+        df_result = pd.concat([self._data, predicted_df], axis=0)
+        return df_result
+    
     
     def get_result(self, model):
-        model_name = "model_" + model.lower()
+        model_name = "model_" + model.lower().replace(' ', '')
         reconstructed_model = joblib.load(model_name + '.joblib')
         X_test = self.__create_data()
         return self.__predict(12, reconstructed_model, X_test[-1:], look_back=48)

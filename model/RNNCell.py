@@ -49,8 +49,7 @@ class RNNCell:
 
         for _ in range(forecast_num):
             x = prediction_list[-look_back:]
-            print(x)
-
+        
             x = x.reshape((1, look_back, 1))
             out = model.predict(x)[0][0]
             prediction_list = np.append(prediction_list, out) 
@@ -58,6 +57,24 @@ class RNNCell:
 
         return  self.__scaler.inverse_transform(prediction_list.reshape(-1,1))
     
+
+
+    def get_result_df(self, model, days = 12, freq='W'):
+        predict = self.get_result(model)
+     
+        last_date = self._data.index[-1]
+        future_dates = pd.date_range(start=last_date , periods=len(predict), freq=freq)
+        print(future_dates)
+        predicted_df = pd.DataFrame(index=future_dates, columns=['price'])
+
+        for i, price in zip(range(len(predicted_df)), predict):
+            predicted_df.iloc[i] = price
+        
+        df_result = pd.concat([self._data, predicted_df], axis=0)
+        return df_result
+    
+
+
     def get_result(self, model):
         model_name = "model_" + model.lower() + ".keras"
         reconstructed_model = keras.models.load_model(model_name)

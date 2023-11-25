@@ -35,16 +35,10 @@ optionModel = st.sidebar.selectbox(
 
 
 if(optionModel in ['LSTM', 'GRU']):
-    prediction_gru = RNNCell(optionModel).get_result(optionModel)
+    prediction_gru = RNNCell(optionModel).get_result_df(optionModel)
 else:
-    prediction_gru = SLCell(optionModel).get_result(optionModel)
+    prediction_gru = SLCell(optionModel).get_result_df(optionModel)
 
-predicted_dates = pd.date_range(end='1/1/2023',freq ='W', periods=len(prediction_gru))
-
-
-predicted_df = pd.DataFrame({'price_pred': prediction_gru}, index=predicted_dates)
-
-merged_df = pd.concat([df, predicted_df], axis=0)
 
 # Drop the redundant columns
 # merged_df.drop(['price_x'], axis=1, inplace=True)
@@ -53,8 +47,8 @@ merged_df = pd.concat([df, predicted_df], axis=0)
 col1, col2 = st.columns([3, 1])
 
 col1.title('Giá lúa sau dự đoán với mô hình ' + optionModel)
-col1.line_chart(merged_df)
-st.dataframe(merged_df)
+col1.line_chart(prediction_gru)
+st.dataframe(prediction_gru)
 
 col2.title('Giá lúa dự đoán')
-col2.dataframe(predicted_df)
+col2.dataframe(prediction_gru)
