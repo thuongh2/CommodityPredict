@@ -16,7 +16,6 @@ df = pd.read_csv('./data.csv',  parse_dates=['date'], index_col='date')
 
 dataset = df.copy()
 dataset = dataset.resample('W').ffill()
-l = len(dataset)
 
 # Using object notation
 add_selectbox = st.sidebar.selectbox(
@@ -48,8 +47,7 @@ else:
 
 
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=prediction_gru.index[l:], y=prediction_gru['price'],  color="red", name="Giá cũ", mode="lines"))
-fig.add_trace(go.Scatter(x=prediction_gru.index[], y=prediction_gru['price_pred'], color="blue", name="Giá dự đoán", mode="lines"))
+fig.add_trace(go.Scatter(x=prediction_gru.index, y=prediction_gru['price'], name="Giá cũ", mode="lines"))
 
 col1, col2 = st.columns([3, 1])
 
