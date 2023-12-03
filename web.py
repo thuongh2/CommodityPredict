@@ -9,13 +9,11 @@ import plotly.graph_objects as go
 
 from model.RNNCell import RNNCell
 from model.SLCell import SLCell
+from model.Commodity import Commodity
 
+
+# full screen
 st.set_page_config(layout="wide")
-
-df = pd.read_csv('./data.csv',  parse_dates=['date'], index_col='date')
-
-dataset = df.copy()
-dataset = dataset.resample('W').ffill()
 
 # Using object notation
 add_selectbox = st.sidebar.selectbox(
@@ -26,7 +24,7 @@ add_selectbox = st.sidebar.selectbox(
 )
 
 
-optionModel = st.sidebar.selectbox(
+option_model = st.sidebar.selectbox(
     "Lựa chọn thuật toán?",
    ("LSTM", "GRU", "SVM", "XGBoost", "Random Forest"),
    index=0,
@@ -35,27 +33,40 @@ optionModel = st.sidebar.selectbox(
 )
 
 
-
-if(optionModel in ['LSTM', 'GRU']):
-    prediction_gru = RNNCell(optionModel).get_result_df(optionModel)
-else:
-    prediction_gru = SLCell(optionModel).get_result_df(optionModel)
+predict, prediction_gru =  Commodity(option_model, './data.csv').get_predict(option_model, 'AGRICULTURAL')
 
 
+kpi1, kpi2, kpi3 = st.columns(3)
+
+    # fill in those three columns with respective metrics or KPIs
+kpi1.metric(
+        label="Trung bình giá lúa",
+        value=round(predict.mean())
+)
+
+
+kpi2.metric(
+        label="Giá lúa lớn nhất",
+        value=round(predict.max())
+)
+
+kpi3.metric(
+        label="Giá lúa thấp nhất",
+        value=round(predict.min()),
+)
+
+
+
+col1, col2 = st.columns([3, 1])
 # Drop the redundant columns
 # merged_df.drop(['price_x'], axis=1, inplace=True)
+col1.title('Giá lúa sau dự đoán với mô hình ' + option_model)
+    # create three columns
 
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=prediction_gru.index, y=prediction_gru['price'], name="Giá cũ", mode="lines"))
 
-col1, col2 = st.columns([3, 1])
 
-col1.title('Giá lúa sau dự đoán với mô hình ' + optionModel)
-col1.line_chart(prediction_gru)
-st.dataframe(prediction_gru)
-
-st.plotly_chart(fig)
-
-col2.title('Giá lúa dự đoán')
-col2.dataframe(prediction_gru)
+st.line_chart(prediction_gru)
+st.dataframe(predict)

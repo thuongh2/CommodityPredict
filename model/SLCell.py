@@ -42,7 +42,7 @@ class SLCell:
             Xs.append(v)
             ys.append(X[i+look_back])
             
-        return np.squeeze(np.array(Xs), axis=-1), np.array(ys),
+        return np.squeeze(np.array(Xs), axis=-1), np.array(ys)
 
 
     def __predict(self, forecast_num, model,data,look_back):
@@ -65,6 +65,7 @@ class SLCell:
 
         return predicted_prices
     
+    
     def get_result_df(self, model, days=12, freq='W'):
         predict = self.get_result(model)
 
@@ -79,6 +80,7 @@ class SLCell:
         df_result = pd.concat([self._data, predicted_df], axis=0)
         return df_result
     
+
     
     def get_result(self, model):
         model_name = "model_" + model.lower().replace(' ', '')
