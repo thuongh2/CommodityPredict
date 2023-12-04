@@ -17,7 +17,7 @@ class Commodity:
         self.__scaler = None
 
     
-    def __create_data(self, mode, type_fill = 'W'):
+    def __create_data(self, mode, lool_back = 48, type_fill = 'W'):
         dataset = self._data.copy()
         dataset = dataset.resample(type_fill).ffill()
 
@@ -35,7 +35,7 @@ class Commodity:
         train_scaled = self.__scaler.transform(train_data)
         test_scaled = self.__scaler.transform(test_data)   
 
-        return self.__create_time_series_data(test_scaled, 48, mode)
+        return self.__create_time_series_data(test_scaled, lool_back, mode)
     
 
     def __create_time_series_data(self, X, look_back = 48, mode = 'rnn'):
@@ -51,7 +51,7 @@ class Commodity:
     
 
 
-    def __predict_rnn(self, forecast_num, model,data,look_back):
+    def __predict_rnn(self, forecast_num, model, data, look_back=48):
 
         predicted_prices = data[-look_back:]
 
@@ -67,7 +67,6 @@ class Commodity:
     
 
     def __predict_ensemble(self, forecast_num, model, data, look_back, time = 49):
-        time = 49
 
         dataset = self._data.copy()
         dataset = self.__scaler.transform(dataset)
@@ -89,22 +88,30 @@ class Commodity:
     def get_result(self, model, type):
 
         assert type != None
-        model_name = './joblib_model/' + 'model_' + model.lower().replace(' ', '') + '.joblib'
-        reconstructed_model = joblib.load(model_name)
+
         
         mode = 'rnn' if model in ['LSTM', 'GRU'] else 'en'
 
+        global folder
+
+        look_back = 48
         X_test = pd.DataFrame()
         if type == self.AGRICULTURAL:
             X_test, _ = self.__create_data(mode)
-
+            folder =  'algricultural'
         else:
-            X_test, _ = self.__create_data(mode)
+            look_back = 30
+            X_test, _ = self.__create_data(mode, lool_back = look_back)
+            folder = 'oil'
+
+        # model_name = './' + folder + '/model_' + model.lower().replace(' ', '') + '.joblib'
+        model_name = './%s/model_%s.joblib' % (folder,  model.lower().replace(' ', ''))
+        reconstructed_model = joblib.load(model_name)
 
         if model in ['LSTM', 'GRU']:
-            self._predict = self.__predict_rnn(12, reconstructed_model, X_test[-1:], look_back= 48)
+            self._predict = self.__predict_rnn(12, reconstructed_model, X_test[-1:], look_back= look_back)
         else:
-            self._predict = self.__predict_ensemble(12, reconstructed_model, X_test[-1:], look_back= 48)
+            self._predict = self.__predict_ensemble(12, reconstructed_model, X_test[-1:], look_back= look_back, time= look_back + 1)
         return self._predict
 
 
@@ -112,22 +119,26 @@ class Commodity:
 
         last_date = self._data.index[-1] 
         future_dates = pd.date_range(start=last_date , periods=len(predict_list), freq=freq)
-        predicted_df = pd.DataFrame(index=future_dates, columns=['price'])
+        predicted_df = pd.DataFrame(index=future_dates, columns=['price_predict'])
 
         for i, price in zip(range(len(predicted_df)), predict_list):
             predicted_df.iloc[i] = price
+      
+        df_result = pd.concat([self._data, predicted_df], axis= 1)
+        df_result.loc[predicted_df.index[0], 'price'] = predict_list[0]
 
-        df_result = pd.concat([self._data, predicted_df], axis= 0)
+        # df_result = self._data.join(predict_list)
 
-        return df_result
+        return df_result, predicted_df
     
 
     def get_predict(self, model, type):
         self._predict = self.get_result(model, type)
 
-        df_predict = self.get_result_df(predict_list= self._predict)
-        print(self._predict)
-        return np.array(self._predict), df_predict
+        df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict)
+    
+        return np.array(self._predict), df_predict_full, predicted_df
+    
 
 
         

@@ -18,7 +18,7 @@ st.set_page_config(layout="wide")
 # Using object notation
 add_selectbox = st.sidebar.selectbox(
     "Lựa chọn loại hàng hóa?",
-   ("Lúa gạo", "Giá xăng"),
+   ("Giá lúa", "Giá xăng"),
    index=0,
    placeholder="Select contact method...",
 )
@@ -32,41 +32,44 @@ option_model = st.sidebar.selectbox(
    key="2"
 )
 
+type = Commodity.AGRICULTURAL
+data_name = './data.csv'
+if add_selectbox == 'Giá xăng':
+    type = Commodity.OIL
+    data_name = './data_oil.csv'
 
-predict, prediction_gru =  Commodity(option_model, './data.csv').get_predict(option_model, 'AGRICULTURAL')
+com =  Commodity(option_model, data_name)
+predict, prediction_gru, predict_df = com.get_predict(option_model, type)
 
+st.title(add_selectbox + ' sau dự đoán với mô hình ' + option_model, )
 
 kpi1, kpi2, kpi3 = st.columns(3)
 
     # fill in those three columns with respective metrics or KPIs
 kpi1.metric(
-        label="Trung bình giá lúa",
+        label= add_selectbox + " trung bình",
         value=round(predict.mean())
 )
 
 
 kpi2.metric(
-        label="Giá lúa lớn nhất",
+        label= add_selectbox + " lớn nhất",
         value=round(predict.max())
 )
 
 kpi3.metric(
-        label="Giá lúa thấp nhất",
+        label=add_selectbox +  " thấp nhất",
         value=round(predict.min()),
 )
 
 
 
 col1, col2 = st.columns([3, 1])
-# Drop the redundant columns
-# merged_df.drop(['price_x'], axis=1, inplace=True)
-col1.title('Giá lúa sau dự đoán với mô hình ' + option_model)
-    # create three columns
 
+# tách màu giá lúa
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=prediction_gru.index, y=prediction_gru['price'], name="Giá cũ", mode="lines"))
+st.line_chart(prediction_gru, color = ('#3440eb' , '#eb345f'))
 
-
-st.line_chart(prediction_gru)
-st.dataframe(predict)
+df_format = predict_df
+df_format.index = df_format.index.strftime('%d-%m-%Y')
+st.dataframe(df_format, width= 500)
