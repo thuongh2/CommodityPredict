@@ -1,0 +1,137 @@
+import pandas as pd
+import numpy as np
+import keras
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+import joblib
+
+
+class Commodity:
+
+    AGRICULTURAL = 'AGRICULTURAL'
+    OIL = 'OIL'
+
+    def __init__(self, model, data) -> None:
+        self.model = model
+        self._data = pd.read_csv(data, parse_dates=['date'], index_col='date')
+        self._predict = pd.DataFrame()
+        self.__scaler = None
+
+    
+    def __create_data(self, mode, type_fill = 'W'):
+        dataset = self._data.copy()
+        dataset = dataset.resample(type_fill).ffill()
+
+        train_size = int(len(dataset) * 0.8)
+
+        # train_data = df.WC.loc[:train_size] -----> it gives a series
+        # Do not forget use iloc to select a number of rows
+        train_data = dataset.iloc[:train_size]
+        test_data = dataset.iloc[train_size:]
+
+        # Scale data
+        # The input to scaler.fit -> array-like, sparse matrix, dataframe of shape (n_samples, n_features)
+        self.__scaler = MinMaxScaler().fit(train_data)
+
+        train_scaled = self.__scaler.transform(train_data)
+        test_scaled = self.__scaler.transform(test_data)   
+
+        return self.__create_time_series_data(test_scaled, 48, mode)
+    
+
+    def __create_time_series_data(self, X, look_back = 48, mode = 'rnn'):
+        Xs, ys = [], []
+        
+        for i in range(len(X) - look_back):
+            v = X[i:i+look_back]
+            Xs.append(v)
+            ys.append(X[i+look_back])
+        if(mode == 'rnn'):
+            return np.array(Xs), np.array(ys)
+        return np.squeeze(np.array(Xs), axis=-1), np.array(ys)
+    
+
+
+    def __predict_rnn(self, forecast_num, model,data,look_back):
+
+        predicted_prices = data[-look_back:]
+
+        for _ in range(forecast_num):
+            x = predicted_prices[-look_back:]
+        
+            x = x.reshape((1, look_back, 1))
+            out = model.predict(x)[0][0]
+            predicted_prices = np.append(predicted_prices, out) 
+        predicted_prices = predicted_prices[look_back-1:]
+
+        return  self.__scaler.inverse_transform(predicted_prices.reshape(-1,1))
+    
+
+    def __predict_ensemble(self, forecast_num, model, data, look_back, time = 49):
+        time = 49
+
+        dataset = self._data.copy()
+        dataset = self.__scaler.transform(dataset)
+        # Lấy dữ liệu cuối cùng từ tập dữ liệu
+        last_data = dataset[-time:]
+        last_data = last_data.reshape(1, -1)[:, -(time-1):]
+
+        predicted_prices = []
+
+        for day in range(forecast_num):
+            next_prediction = model.predict(last_data)
+            last_data = np.append(last_data, next_prediction).reshape(1, -1)[:, 1:]
+            predicted_price = self.__scaler.inverse_transform(next_prediction.reshape(-1, 1))
+            predicted_prices.append(predicted_price[0, 0])
+
+        return predicted_prices
+    
+    
+    def get_result(self, model, type):
+
+        assert type != None
+        model_name = './joblib_model/' + 'model_' + model.lower().replace(' ', '') + '.joblib'
+        reconstructed_model = joblib.load(model_name)
+        
+        mode = 'rnn' if model in ['LSTM', 'GRU'] else 'en'
+
+        X_test = pd.DataFrame()
+        if type == self.AGRICULTURAL:
+            X_test, _ = self.__create_data(mode)
+
+        else:
+            X_test, _ = self.__create_data(mode)
+
+        if model in ['LSTM', 'GRU']:
+            self._predict = self.__predict_rnn(12, reconstructed_model, X_test[-1:], look_back= 48)
+        else:
+            self._predict = self.__predict_ensemble(12, reconstructed_model, X_test[-1:], look_back= 48)
+        return self._predict
+
+
+    def get_result_df(self, predict_list, days= 12, freq= 'W'):
+
+        last_date = self._data.index[-1] 
+        future_dates = pd.date_range(start=last_date , periods=len(predict_list), freq=freq)
+        predicted_df = pd.DataFrame(index=future_dates, columns=['price'])
+
+        for i, price in zip(range(len(predicted_df)), predict_list):
+            predicted_df.iloc[i] = price
+
+        df_result = pd.concat([self._data, predicted_df], axis= 0)
+
+        return df_result
+    
+
+    def get_predict(self, model, type):
+        self._predict = self.get_result(model, type)
+
+        df_predict = self.get_result_df(predict_list= self._predict)
+        print(self._predict)
+        return np.array(self._predict), df_predict
+
+
+        
+
+
+
+

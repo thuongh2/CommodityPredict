@@ -8,14 +8,15 @@ class RNNCell:
     def __init__(self, model) -> None:
         self.model = model
         self._data = pd.read_csv('./data.csv',  parse_dates=['date'], index_col='date')
+        self._predict = pd.DataFrame()
         self.__scaler = None
 
 
-    def __create_data(self):
+    def __create_data(self, type_fill = 'W'):
         dataset = self._data.copy()
-        dataset = dataset.resample('W').ffill()
+        dataset = dataset.resample(type_fill).ffill()
 
-        train_size = int(len(dataset)*0.8)
+        train_size = int(len(dataset) * 0.8)
 
         # train_data = df.WC.loc[:train_size] -----> it gives a series
         # Do not forget use iloc to select a number of rows
@@ -29,11 +30,11 @@ class RNNCell:
         train_scaled = self.__scaler.transform(train_data)
         test_scaled = self.__scaler.transform(test_data)   
 
-        return self.__create_timeseries_data(test_scaled, 48)
+        return self.__create_time_series_data(test_scaled, 48)
 
 
 
-    def __create_timeseries_data(self, X, look_back = 48):
+    def __create_time_series_data(self, X, look_back = 48):
         Xs, ys = [], []
         
         for i in range(len(X)-look_back):
@@ -45,6 +46,7 @@ class RNNCell:
 
 
     def __predict(self, forecast_num, model,data,look_back):
+
         prediction_list = data[-look_back:]
 
         for _ in range(forecast_num):
@@ -65,12 +67,12 @@ class RNNCell:
         last_date = self._data.index[-1]
         future_dates = pd.date_range(start=last_date , periods=len(predict), freq=freq)
         print(future_dates)
-        predicted_df = pd.DataFrame(index=future_dates, columns=['price'])
+        self.__predict = pd.DataFrame(index= future_dates, columns=['price'])
 
-        for i, price in zip(range(len(predicted_df)), predict):
-            predicted_df.iloc[i] = price
+        for i, price in zip(range(len(self.__predict)), predict):
+            self.__predict.iloc[i] = price
         
-        df_result = pd.concat([self._data, predicted_df], axis=0)
+        df_result = pd.concat([self._data, self.__predict], axis=0)
         return df_result
     
 
