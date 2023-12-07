@@ -20,7 +20,7 @@ add_selectbox = st.sidebar.selectbox(
     "Lựa chọn loại hàng hóa?",
    ("Giá lúa", "Giá xăng"),
    index=0,
-   placeholder="Select contact method...",
+#    placeholder="Select contact method...",
 )
 
 
@@ -28,7 +28,7 @@ option_model = st.sidebar.selectbox(
     "Lựa chọn thuật toán?",
    ("LSTM", "GRU", "SVM", "XGBoost", "Random Forest"),
    index=0,
-   placeholder="Select contact method...",
+#    placeholder="Select contact method...",
    key="2"
 )
 
