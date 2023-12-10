@@ -100,12 +100,13 @@ class Commodity:
             X_test, _ = self.__create_data(mode)
             folder =  'algricultural'
         else:
-            look_back = 30
+            look_back = 12
             X_test, _ = self.__create_data(mode, lool_back = look_back)
             folder = 'oil'
 
         # model_name = './' + folder + '/model_' + model.lower().replace(' ', '') + '.joblib'
         model_name = './%s/model_%s.joblib' % (folder,  model.lower().replace(' ', ''))
+        print(model_name)
         reconstructed_model = joblib.load(model_name)
 
         if model in ['LSTM', 'GRU']:
@@ -132,10 +133,10 @@ class Commodity:
         return df_result, predicted_df
     
 
-    def get_predict(self, model, type):
+    def get_predict(self, model, type, freq = 'W'):
         self._predict = self.get_result(model, type)
 
-        df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict)
+        df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict, freq=freq)
     
         return np.array(self._predict), df_predict_full, predicted_df
     

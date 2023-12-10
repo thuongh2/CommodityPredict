@@ -33,13 +33,15 @@ option_model = st.sidebar.selectbox(
 )
 
 type = Commodity.AGRICULTURAL
+freq = 'W'
 data_name = './data.csv'
 if add_selectbox == 'Giá xăng':
     type = Commodity.OIL
-    data_name = './data_oil.csv'
+    data_name = './df_oil.csv'
+    freq = 'D'
 
 com =  Commodity(option_model, data_name)
-predict, prediction_gru, predict_df = com.get_predict(option_model, type)
+predict, prediction_gru, predict_df = com.get_predict(option_model, type, freq)
 
 st.title(add_selectbox + ' sau dự đoán với mô hình ' + option_model, )
 
