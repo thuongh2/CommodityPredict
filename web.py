@@ -38,7 +38,7 @@ data_name = './data.csv'
 if add_selectbox == 'Giá xăng':
     type = Commodity.OIL
     data_name = './df_oil.csv'
-    freq = 'D'
+    freq = '3D'
 
 com =  Commodity(option_model, data_name)
 predict, prediction_gru, predict_df = com.get_predict(option_model, type, freq)

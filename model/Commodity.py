@@ -116,7 +116,7 @@ class Commodity:
         return self._predict
 
 
-    def get_result_df(self, predict_list, days= 12, freq= 'W'):
+    def get_result_df(self, predict_list, type, days= 12, freq= 'W'):
 
         last_date = self._data.index[-1] 
         future_dates = pd.date_range(start=last_date , periods=len(predict_list), freq=freq)
@@ -125,7 +125,12 @@ class Commodity:
         for i, price in zip(range(len(predicted_df)), predict_list):
             predicted_df.iloc[i] = price
       
-        df_result = pd.concat([self._data, predicted_df], axis= 1)
+        if(type == self.OIL):
+            df_oil = pd.read_csv('./gasoline.csv', parse_dates=['date'], index_col='date')
+            self._data = df_oil
+        
+        plot_time = int(len(self._data) * 0.5)
+        df_result = pd.concat([self._data[plot_time:], predicted_df], axis= 1)
         df_result.loc[predicted_df.index[0], 'price'] = predict_list[0]
 
         # df_result = self._data.join(predict_list)
@@ -136,7 +141,7 @@ class Commodity:
     def get_predict(self, model, type, freq = 'W'):
         self._predict = self.get_result(model, type)
 
-        df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict, freq=freq)
+        df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict,  type=type, freq=freq)
     
         return np.array(self._predict), df_predict_full, predicted_df
     
