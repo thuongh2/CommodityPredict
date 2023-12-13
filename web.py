@@ -40,10 +40,25 @@ if add_selectbox == 'Giá xăng':
     data_name = './df_oil.csv'
     freq = '3D'
 
-com =  Commodity(option_model, data_name)
-predict, prediction_gru, predict_df = com.get_predict(option_model, type, freq)
+if type == Commodity.AGRICULTURAL:
+    month_select = st.sidebar.select_slider(
+        'Chọn khoảng thời gian dự đoán',
+        options=['1 tháng', '2 tháng', '3 tháng'])
+else:
+    month_select = st.sidebar.select_slider(
+        'Chọn khoảng thời gian dự đoán',
+        options=['1 tuần', '2 tuần', '3 tuần', '4 tuần'])
 
-st.title(add_selectbox + ' sau dự đoán với mô hình ' + option_model, )
+global time
+month = month_select.split(" ")[0]
+time = int(month) * 4
+
+
+
+com =  Commodity(option_model, data_name)
+predict, prediction_gru, predict_df = com.get_predict(option_model, type, freq, time)
+
+st.title(add_selectbox + ' sau dự đoán với mô hình ' + option_model + " trong " + month_select )
 
 kpi1, kpi2, kpi3 = st.columns(3)
 
@@ -65,8 +80,9 @@ kpi3.metric(
 )
 
 
-
 col1, col2 = st.columns([3, 1])
+
+
 
 # tách màu giá lúa
 

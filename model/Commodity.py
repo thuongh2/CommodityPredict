@@ -85,11 +85,10 @@ class Commodity:
         return predicted_prices
     
     
-    def get_result(self, model, type):
+    def get_result(self, model, type, time):
 
         assert type != None
 
-        
         mode = 'rnn' if model in ['LSTM', 'GRU'] else 'en'
 
         global folder
@@ -109,14 +108,15 @@ class Commodity:
         print(model_name)
         reconstructed_model = joblib.load(model_name)
 
+    
         if model in ['LSTM', 'GRU']:
-            self._predict = self.__predict_rnn(12, reconstructed_model, X_test[-1:], look_back= look_back)
+            self._predict = self.__predict_rnn(time, reconstructed_model, X_test[-1:], look_back= look_back)
         else:
-            self._predict = self.__predict_ensemble(12, reconstructed_model, X_test[-1:], look_back= look_back, time= look_back + 1)
+            self._predict = self.__predict_ensemble(time, reconstructed_model, X_test[-1:], look_back= look_back, time= look_back + 1)
         return self._predict
 
 
-    def get_result_df(self, predict_list, type, days= 12, freq= 'W'):
+    def get_result_df(self, predict_list, type, freq= 'W'):
 
         last_date = self._data.index[-1] 
         future_dates = pd.date_range(start=last_date , periods=len(predict_list), freq=freq)
@@ -125,11 +125,13 @@ class Commodity:
         for i, price in zip(range(len(predicted_df)), predict_list):
             predicted_df.iloc[i] = price
       
+        plot_time = int(len(self._data) * 0.6)
         if(type == self.OIL):
             df_oil = pd.read_csv('./gasoline.csv', parse_dates=['date'], index_col='date')
             self._data = df_oil
+            plot_time = 0
         
-        plot_time = int(len(self._data) * 0.5)
+
         df_result = pd.concat([self._data[plot_time:], predicted_df], axis= 1)
         df_result.loc[predicted_df.index[0], 'price'] = predict_list[0]
 
@@ -138,8 +140,8 @@ class Commodity:
         return df_result, predicted_df
     
 
-    def get_predict(self, model, type, freq = 'W'):
-        self._predict = self.get_result(model, type)
+    def get_predict(self, model, type, freq,  time= 12):
+        self._predict = self.get_result(model, type, time)
 
         df_predict_full, predicted_df = self.get_result_df(predict_list= self._predict,  type=type, freq=freq)
     
