@@ -16,6 +16,21 @@ Mục tiêu của đồ án là tìm hiểu các nghiên cứu về phương ph�
 -	Chọn ra các thuật toán phù hợp để xây dựng mô hình dự đoán giá nông sản, giá xăng.
 -	Ứng dụng xây dựng được website dự đoán giá nông sản, giá xăng trong tương lai.
 
+## Hướng Dẫn Cài Đặt
+
+Đầu tiên, cần cài đặt môi trường Python trên.
+
+```bash
+pip install -r requirements.txt
+```
+Tiến hành chạy file Rice-predict.ipynb và Oil_Predict.ipynb để train model đự đoán
+
+Tiền hành chạy web streamlit dự đoán giá hàng hóa
+
+ ```bash
+    streamlit run web.py
+```
+Mở trình duyệt và truy cập địa chỉ `http://localhost:8501` để xem ứng dụng.
 
 
 
