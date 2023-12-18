@@ -90,4 +90,18 @@ st.line_chart(prediction_gru, color = ('#3440eb' , '#eb345f'))
 
 df_format = predict_df
 df_format.index = df_format.index.strftime('%d-%m-%Y')
-st.dataframe(df_format, width= 500)
+
+st.title("Bảng giá dự đoán")
+st.dataframe(df_format, width= 1000)
+
+
+def render_footer():
+    for _ in range(3):
+        st.write('\n')
+    st.markdown(
+        "<br><hr><center>Developed by Võ Hoài Thương - 20133012 và Huỳnh Hạo Nhị - 20133006</center><hr>",
+        unsafe_allow_html=True)
+    st.markdown("<style> footer {visibility: hidden;} </style>", unsafe_allow_html=True)
+    # HTML và CSS để sử dụng ảnh nền
+
+render_footer()
