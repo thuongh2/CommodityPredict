@@ -3,7 +3,7 @@ import numpy as np
 import keras
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import joblib
-
+import tensorflow as tf
 
 class Commodity:
 
@@ -104,9 +104,15 @@ class Commodity:
             folder = 'oil'
 
         # model_name = './' + folder + '/model_' + model.lower().replace(' ', '') + '.joblib'
-        model_name = './%s/model_%s.joblib' % (folder,  model.lower().replace(' ', ''))
+      
+        if model in ['LSTM', 'GRU']:
+            model_name = './%s/model_%s.h5' % (folder,  model.lower().replace(' ', ''))
+            reconstructed_model = tf.keras.models.load_model(model_name)
+        else:
+            model_name = './%s/model_%s.joblib' % (folder,  model.lower().replace(' ', ''))
+            reconstructed_model = joblib.load(model_name)
+
         print(model_name)
-        reconstructed_model = joblib.load(model_name)
 
     
         if model in ['LSTM', 'GRU']:
