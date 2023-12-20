@@ -21,16 +21,19 @@ Mục tiêu của đồ án là tìm hiểu các nghiên cứu về phương ph�
 Đầu tiên, cần cài đặt môi trường Python trên.
 
 ```bash
- pip install -r requirements.txt
+pip install -r requirements.txt
 ```
-Tiến hành chạy file Rice_predict.ipynb và Oil_Predict.ipynb để train model đự đoán
+Tiến hành chạy file Rice-predict.ipynb và Oil_Predict.ipynb để train model đự đoán
+
 
 Tiền hành chạy web streamlit dự đoán giá hàng hóa
 
  ```bash
- streamlit run web.py
+    streamlit run web.py
 ```
 Mở trình duyệt và truy cập địa chỉ `http://localhost:8501` để xem ứng dụng.
+
+Truy cập ứng dụng trực tuyến tại `https://commoditypredict.streamlit.app/`
 
 
 
