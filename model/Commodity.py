@@ -133,7 +133,7 @@ class Commodity:
       
         plot_time = int(len(self._data) * 0.6)
         if(type == self.OIL):
-            df_oil = pd.read_csv('./gasoline.csv', parse_dates=['date'], index_col='date')
+            df_oil = pd.read_csv('./data/gasoline.csv', parse_dates=['date'], index_col='date')
             self._data = df_oil
             plot_time = 0
         

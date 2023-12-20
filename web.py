@@ -7,8 +7,6 @@ import joblib
 
 import plotly.graph_objects as go
 
-from model.RNNCell import RNNCell
-from model.SLCell import SLCell
 from model.Commodity import Commodity
 
 
@@ -34,10 +32,10 @@ option_model = st.sidebar.selectbox(
 
 type = Commodity.AGRICULTURAL
 freq = 'W'
-data_name = './data.csv'
+data_name = './data/data.csv'
 if add_selectbox == 'Giá xăng':
     type = Commodity.OIL
-    data_name = './df_oil.csv'
+    data_name = './data/df_oil.csv'
     freq = '3D'
 
 if type == Commodity.AGRICULTURAL:
