@@ -14,7 +14,7 @@ Tiến hành chạy file Rice-predict.ipynb và Oil_Predict.ipynb để train mo
 Tiền hành chạy web streamlit dự đoán giá hàng hóa
 
  ```bash
-    streamlit run web.py
+streamlit run web.py
 ```
 Mở trình duyệt và truy cập địa chỉ `http://localhost:8501` để xem ứng dụng.
 
