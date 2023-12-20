@@ -33,7 +33,7 @@ Tiền hành chạy web streamlit dự đoán giá hàng hóa
 ```
 Mở trình duyệt và truy cập địa chỉ `http://localhost:8501` để xem ứng dụng.
 
-Truy cập ứng dụng trực tuyến tại `https://commoditypredict.streamlit.app/`
+Truy cập web site dự đoán giá hàng hóa trực tuyến tại [(https://commoditypredict.streamlit.app/)](https://commoditypredict.streamlit.app/) 
 
 
 
