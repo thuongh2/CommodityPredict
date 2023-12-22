@@ -131,11 +131,11 @@ class Commodity:
         for i, price in zip(range(len(predicted_df)), predict_list):
             predicted_df.iloc[i] = price
       
-        plot_time = int(len(self._data) * 0.6)
+        plot_time = int(len(self._data) * 0.95)
         if(type == self.OIL):
             df_oil = pd.read_csv('./data/gasoline.csv', parse_dates=['date'], index_col='date')
             self._data = df_oil
-            plot_time = 0
+            plot_time = int(len(self._data) * 0.78)
         
 
         df_result = pd.concat([self._data[plot_time:], predicted_df], axis= 1)
